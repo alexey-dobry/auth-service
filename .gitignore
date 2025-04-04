@@ -1,0 +1,12 @@
+*.yaml
+
+!*.example.yaml
+!docker-compose.yaml
+
+.env
+
+!.example.env
+
+*.log
+
+!*.example.log
