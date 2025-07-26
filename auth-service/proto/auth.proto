@@ -7,16 +7,18 @@ option go_package = "nh.auth.v1;authv1";
 service Auth {
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc Login (LoginRequest) returns (LoginResponse);
-  rpc IsAdmin (IsAdminRequest) returns (IsAdminResponse);
+  rpc Refresh (RefreshRequest) returns (RefreshResponse);
+  rpc Logout (LogoutRequest) returns (LogoutResponse);
 }
 
 message RegisterRequest {
   string email = 1;
-  string password = 2;
+  string password = 3;
 }
 
 message RegisterResponse {
-  int64 user_id = 1;
+  string access_token = 1;
+  string refresh_token = 2;
 }
 
 message LoginRequest {
@@ -25,13 +27,23 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  string tocken = 1;
+  string access_token = 1;
+  string refresh_token = 2;
 }
 
-message IsAdminRequest {
-  int64 user_id = 1;
+message RefreshRequest {
+  string refresh_token = 1;
 }
 
-message IsAdminResponse {
-  bool is_admin = 1;
+message RefreshResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+}
+
+message LogoutRequest {
+  string refresh_token = 1;
+}
+
+message LogoutResponse {
+  bool success = 1;
 }
