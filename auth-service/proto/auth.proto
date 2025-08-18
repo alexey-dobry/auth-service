@@ -8,12 +8,14 @@ service Auth {
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc Login (LoginRequest) returns (LoginResponse);
   rpc Refresh (RefreshRequest) returns (RefreshResponse);
-  rpc Logout (LogoutRequest) returns (LogoutResponse);
 }
 
 message RegisterRequest {
-  string email = 1;
+  string username = 1;
+  string email = 2;
   string password = 3;
+  string first_name = 4;
+  string last_name = 5;
 }
 
 message RegisterResponse {
@@ -38,12 +40,4 @@ message RefreshRequest {
 message RefreshResponse {
   string access_token = 1;
   string refresh_token = 2;
-}
-
-message LogoutRequest {
-  string refresh_token = 1;
-}
-
-message LogoutResponse {
-  bool success = 1;
 }
