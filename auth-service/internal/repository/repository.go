@@ -10,11 +10,5 @@ type UserRepository interface {
 
 	GetOne(email string) (model.User, error)
 
-	UpdateUser(userId uuid.UUID, newData UpdateUserParams) error
-
 	Delete(userId uuid.UUID) error
-}
-
-type UpdateUserParams struct {
-	NewPassword string
 }
