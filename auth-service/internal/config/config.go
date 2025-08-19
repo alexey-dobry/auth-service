@@ -38,7 +38,7 @@ func MustLoad() Config {
 }
 
 func ParseFlag(cfg Config, logger *logger.Logger) string {
-	configPath := flag.String("config", "configs/config.yaml", "config file path")
+	configPath := flag.String("config", "config/config.yaml", "config file path")
 	configHelp := flag.Bool("help", false, "show configuration help")
 
 	if *configHelp {
