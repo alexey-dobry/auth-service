@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/alexey-dobry/goauth/internal/logger"
+	"github.com/alexey-dobry/auth-service/internal/logger"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

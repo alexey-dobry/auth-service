@@ -10,3 +10,5 @@
 *.log
 
 !*.example.log
+
+/script

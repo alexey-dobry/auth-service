@@ -2,51 +2,55 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	"os"
-	"time"
 
+	"github.com/alexey-dobry/auth-service/internal/domain/jwt"
+	"github.com/alexey-dobry/auth-service/internal/domain/validator"
+	"github.com/alexey-dobry/auth-service/internal/logger"
+	"github.com/alexey-dobry/auth-service/internal/logger/zap"
+	pg "github.com/alexey-dobry/auth-service/internal/repository/postgresql"
+	"github.com/alexey-dobry/auth-service/internal/server/grpc"
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	Env            string        `yaml:"env" env-default:"local"`
-	StorageAddress string        `yaml:"storage_address"`
-	TockenTTL      time.Duration `yaml:"tocken_ttl"`
-	GRPC           GRPCConfig    `yaml:"grpc"`
+	Logger     zap.Config  `yaml:"logger"`
+	gRPC       grpc.Config `yaml:"grpc"`
+	Repository pg.Config   `yaml:"repository"`
+	JWT        jwt.Config  `yaml:"jwt"`
 }
 
-type GRPCConfig struct {
-	Port    int           `yaml:"port"`
-	Timeout time.Duration `yaml:"timeout"`
-}
-
-func MustLoad() *Config {
+func MustLoad() Config {
+	logger := zap.NewLogger(zap.Config{}).WithFields("layer", "config")
 	var cfg Config
-	path := getFilePath()
-	if path == "" {
-		panic("config path is empty")
+	configPath := ParseFlag(cfg, &logger)
+
+	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
+		logger.Fatalf("Failed to read config on path(%s): %s", configPath, err)
 	}
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		panic("Config file does not exist on designated path")
+	if err := validator.V.Struct(&cfg); err != nil {
+		logger.Fatalf("Failed to validate config: %s", err)
 	}
 
-	err := cleanenv.ReadConfig(path, &cfg)
-	if err != nil {
-		panic("Failed to read config" + err.Error())
-	}
-
-	return &cfg
+	return cfg
 }
 
-func getFilePath() string {
-	var filePath string
-	flag.StringVar(&filePath, "--logsFilePath", "", "path to config file")
-	flag.Parse()
+func ParseFlag(cfg Config, logger *logger.Logger) string {
+	configPath := flag.String("config", "configs/config.yaml", "config file path")
+	configHelp := flag.Bool("help", false, "show configuration help")
 
-	if filePath == "" {
-		filePath = os.Getenv("CONFIG_FILE")
+	if *configHelp {
+		headerText := "Configuration options:"
+		help, err := cleanenv.GetDescription(&cfg, &headerText)
+		if err != nil {
+			(*logger).Fatalf("error getting configuration description: %s", err.Error())
+		}
+
+		fmt.Println(help)
+		os.Exit(0)
 	}
 
-	return filePath
+	return *configPath
 }
