@@ -107,5 +107,4 @@ func (h *jwtHandler) ValidateJWT(token string, jwtType TokenType) (Claims, error
 	}
 
 	return Claims{}, ErrSignatureInvalid
-
 }

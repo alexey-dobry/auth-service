@@ -15,9 +15,10 @@ type ServerAPI struct {
 	jwtHandler jwt.JWTHandler
 }
 
-func NewGRPCServer(logger logger.Logger, repository repository.UserRepository) *ServerAPI {
+func New(logger logger.Logger, repository repository.UserRepository, jwtHandler jwt.JWTHandler) *ServerAPI {
 	return &ServerAPI{
 		repository: repository,
 		logger:     logger.WithFields("layer", "grpc server api", "server", "manager"),
+		jwtHandler: jwtHandler,
 	}
 }
