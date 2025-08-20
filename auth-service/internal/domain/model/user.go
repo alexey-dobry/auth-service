@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/alexey-dobry/auth-service/internal/domain/validator"
+	"github.com/alexey-dobry/auth-service/pkg/validator"
 	"gorm.io/gorm"
 )
 

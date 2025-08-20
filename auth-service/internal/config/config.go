@@ -6,11 +6,11 @@ import (
 	"os"
 
 	"github.com/alexey-dobry/auth-service/internal/domain/jwt"
-	"github.com/alexey-dobry/auth-service/internal/domain/validator"
-	"github.com/alexey-dobry/auth-service/internal/logger"
-	"github.com/alexey-dobry/auth-service/internal/logger/zap"
 	pg "github.com/alexey-dobry/auth-service/internal/repository/postgresql"
 	"github.com/alexey-dobry/auth-service/internal/server/grpc"
+	"github.com/alexey-dobry/auth-service/pkg/logger"
+	"github.com/alexey-dobry/auth-service/pkg/logger/zap"
+	"github.com/alexey-dobry/auth-service/pkg/validator"
 	"github.com/ilyakaznacheev/cleanenv"
 )
 

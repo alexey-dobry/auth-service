@@ -1,0 +1,21 @@
+logger:
+  dir: ./logs
+  is_debug: false
+  is_development: false
+
+grpc:
+  port: 50051
+
+repository:
+  port: 5432
+  host: localhost
+  user: pq_user
+  password: superpass
+  database: postgres
+
+jwt:
+  access-secret: <very-secret-secret>
+  refresh-secret: <so-very-secret-secret>
+  ttl:
+    access-ttl: "0:07:00"
+    refresh-ttl: "7:00:00"
