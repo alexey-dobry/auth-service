@@ -1,9 +1,9 @@
 package pg
 
 type Config struct {
-	Port         int    `yaml:"port"`
-	Host         string `yaml:"host"`
-	User         string `yaml:"user"`
-	Password     string `yaml:"password"`
-	DatabaseName string `yaml:"database"`
+	Port         int    `validate:"required" yaml:"port"`
+	Host         string `validate:"required" yaml:"host"`
+	User         string `validate:"required" yaml:"user"`
+	Password     string `validate:"required" yaml:"password"`
+	DatabaseName string `validate:"required" yaml:"database"`
 }

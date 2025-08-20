@@ -1,5 +1,5 @@
 package grpc
 
 type Config struct {
-	Port int `yaml:"port"`
+	Port int `validate:"required" yaml:"port"`
 }

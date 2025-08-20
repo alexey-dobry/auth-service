@@ -3,12 +3,12 @@ package jwt
 import "time"
 
 type Config struct {
-	AccessSecret  string `yaml:"access-secret"`
-	RefreshSecret string `yaml:"refresh-secret"`
-	TTL           TTL    `yaml:"ttl"`
+	AccessSecret  string `validate:"required" yaml:"access-secret"`
+	RefreshSecret string `validate:"required" yaml:"refresh-secret"`
+	TTL           TTL    `validate:"required" yaml:"ttl"`
 }
 
 type TTL struct {
-	AccessTTL  time.Duration `yaml:"access-ttl"`
-	RefreshTTL time.Duration `yaml:"refresh-ttl"`
+	AccessTTL  time.Duration `validate:"required" yaml:"access-ttl"`
+	RefreshTTL time.Duration `validate:"required" yaml:"refresh-ttl"`
 }
