@@ -11,4 +11,6 @@ type UserRepository interface {
 	GetOne(email string) (model.User, error)
 
 	Delete(userId uuid.UUID) error
+
+	Close() error
 }

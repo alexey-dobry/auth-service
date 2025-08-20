@@ -16,7 +16,7 @@ import (
 
 type Config struct {
 	Logger     zap.Config  `yaml:"logger"`
-	gRPC       grpc.Config `yaml:"grpc"`
+	GRPC       grpc.Config `yaml:"grpc"`
 	Repository pg.Config   `yaml:"repository"`
 	JWT        jwt.Config  `yaml:"jwt"`
 }
