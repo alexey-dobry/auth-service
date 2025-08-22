@@ -1,7 +1,6 @@
 package jwt
 
 import (
-	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"log"
@@ -26,15 +25,15 @@ type JWTHandler interface {
 }
 
 type jwtHandler struct {
-	access_secret  *ecdsa.PrivateKey
-	refresh_secret *ecdsa.PrivateKey
+	access_secret  []byte
+	refresh_secret []byte
 	ttl            TTL
 }
 
 func NewHandler(cfg Config) (JWTHandler, error) {
 	handler := jwtHandler{
-		access_secret:  cfg.AccessSecret,
-		refresh_secret: cfg.RefreshSecret,
+		access_secret:  []byte(cfg.AccessSecret),
+		refresh_secret: []byte(cfg.RefreshSecret),
 		ttl: TTL{
 			AccessTTL:  cfg.TTL.AccessTTL,
 			RefreshTTL: cfg.TTL.RefreshTTL,
@@ -45,7 +44,7 @@ func NewHandler(cfg Config) (JWTHandler, error) {
 }
 
 func (h *jwtHandler) GenerateJWT(claims Claims, jwtType TokenType) (string, error) {
-	var secret *ecdsa.PrivateKey
+	var secret []byte
 	var TTL time.Duration
 	if jwtType == AccessToken {
 		secret = h.access_secret
@@ -57,7 +56,7 @@ func (h *jwtHandler) GenerateJWT(claims Claims, jwtType TokenType) (string, erro
 
 	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(TTL))
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodES256, claims).SignedString(secret)
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(secret)
 	if err != nil {
 		log.Print(err)
 		return "", ErrFailedToGenerateJWT
@@ -71,7 +70,7 @@ func (h *jwtHandler) ExpiresAt() TTL {
 }
 
 func (h *jwtHandler) GenerateJWTPair(claims Claims) (refreshToken, accessToken string, err error) {
-	refreshToken, err = h.GenerateJWT(Claims{}, RefreshToken)
+	refreshToken, err = h.GenerateJWT(claims, RefreshToken)
 	if err != nil {
 		return "", "", fmt.Errorf("Failed to generate refresh token: %s", err)
 	}
@@ -86,7 +85,7 @@ func (h *jwtHandler) GenerateJWTPair(claims Claims) (refreshToken, accessToken s
 
 func (h *jwtHandler) ValidateJWT(token string, jwtType TokenType) (Claims, error) {
 	jwtToken, err := jwt.ParseWithClaims(token, &Claims{}, func(t *jwt.Token) (interface{}, error) {
-		var secret *ecdsa.PrivateKey
+		var secret []byte
 		if jwtType == AccessToken {
 			secret = h.access_secret
 		} else {
@@ -96,8 +95,7 @@ func (h *jwtHandler) ValidateJWT(token string, jwtType TokenType) (Claims, error
 	})
 	if errors.Is(err, jwt.ErrTokenExpired) {
 		return Claims{}, ErrJWTTokenExpired
-	}
-	if err != nil {
+	} else if err != nil {
 		return Claims{}, fmt.Errorf("error parsing jwt with claims: %w", err)
 	}
 

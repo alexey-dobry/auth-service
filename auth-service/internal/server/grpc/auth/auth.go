@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/alexey-dobry/auth-service/internal/domain/jwt"
 	"github.com/alexey-dobry/auth-service/internal/domain/model"
@@ -68,6 +69,10 @@ func (s *ServerAPI) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginR
 		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 
+	if !utils.CheckPasswordHash(req.Password, user.HashPassword) {
+		return nil, status.Error(codes.PermissionDenied, "Wrong password")
+	}
+
 	accessToken, refreshToken, err := s.jwtHandler.GenerateJWTPair(jwt.Claims{
 		ID:        user.ID,
 		Username:  user.Username,
@@ -88,13 +93,14 @@ func (s *ServerAPI) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginR
 	}, nil
 }
 
-func (s *ServerAPI) RefreshToken(ctx context.Context, req *pb.RefreshRequest) (*pb.RefreshResponse, error) {
+func (s *ServerAPI) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.RefreshResponse, error) {
 	claims, err := s.jwtHandler.ValidateJWT(req.RefreshToken, jwt.RefreshToken)
 	if errors.Is(err, jwt.ErrJWTTokenExpired) {
 		return nil, status.Error(codes.Unauthenticated, "JWT token expired")
 	} else if errors.Is(err, jwt.ErrSignatureInvalid) {
 		return nil, status.Error(codes.PermissionDenied, "Permission denied")
 	} else if err != nil {
+		log.Print(err.Error())
 		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 

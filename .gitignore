@@ -12,3 +12,5 @@
 !*.example.log
 
 /script
+
+*logs

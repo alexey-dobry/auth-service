@@ -1,14 +1,13 @@
 package jwt
 
 import (
-	"crypto/ecdsa"
 	"time"
 )
 
 type Config struct {
-	AccessSecret  *ecdsa.PrivateKey `validate:"required" yaml:"access-secret"`
-	RefreshSecret *ecdsa.PrivateKey `validate:"required" yaml:"refresh-secret"`
-	TTL           TTL               `validate:"required" yaml:"ttl"`
+	AccessSecret  string `validate:"required" yaml:"access-secret"`
+	RefreshSecret string `validate:"required" yaml:"refresh-secret"`
+	TTL           TTL    `validate:"required" yaml:"ttl"`
 }
 
 type TTL struct {
