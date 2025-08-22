@@ -28,15 +28,17 @@ func (s *ServerAPI) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.
 	}
 
 	err := s.repository.Add(user)
-	if err != nil {
+	if errors.Is(err, gorm.ErrDuplicatedKey) {
+		return nil, status.Error(codes.AlreadyExists, "Account with specified email already exists")
+	} else if err != nil {
 		errMsg := fmt.Sprintf("Error adding new user to data: %s", err)
 		s.logger.Errorf(errMsg)
 		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 
-	accessToken, refreshToken, err := s.jwtHandler.GenerateJWTPair(jwt.Claims{
+	refreshToken, accessToken, err := s.jwtHandler.GenerateJWTPair(jwt.Claims{
 		ID:        user.ID,
-		UserName:  user.Username,
+		Username:  user.Username,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		IsAdmin:   user.IsAdmin,
@@ -68,7 +70,7 @@ func (s *ServerAPI) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginR
 
 	accessToken, refreshToken, err := s.jwtHandler.GenerateJWTPair(jwt.Claims{
 		ID:        user.ID,
-		UserName:  user.Username,
+		Username:  user.Username,
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		IsAdmin:   user.IsAdmin,

@@ -1,8 +1,10 @@
 package jwt
 
 import (
+	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -24,30 +26,26 @@ type JWTHandler interface {
 }
 
 type jwtHandler struct {
-	access_secret  []byte
-	refresh_secret []byte
+	access_secret  *ecdsa.PrivateKey
+	refresh_secret *ecdsa.PrivateKey
 	ttl            TTL
 }
 
 func NewHandler(cfg Config) (JWTHandler, error) {
 	handler := jwtHandler{
-		access_secret:  []byte(cfg.AccessSecret),
-		refresh_secret: []byte(cfg.RefreshSecret),
+		access_secret:  cfg.AccessSecret,
+		refresh_secret: cfg.RefreshSecret,
 		ttl: TTL{
 			AccessTTL:  cfg.TTL.AccessTTL,
 			RefreshTTL: cfg.TTL.RefreshTTL,
 		},
 	}
 
-	if len(cfg.AccessSecret) == 0 || len(cfg.RefreshSecret) == 0 {
-		return nil, ErrIncorrectJWTSecret
-	}
-
 	return &handler, nil
 }
 
 func (h *jwtHandler) GenerateJWT(claims Claims, jwtType TokenType) (string, error) {
-	var secret []byte
+	var secret *ecdsa.PrivateKey
 	var TTL time.Duration
 	if jwtType == AccessToken {
 		secret = h.access_secret
@@ -61,6 +59,7 @@ func (h *jwtHandler) GenerateJWT(claims Claims, jwtType TokenType) (string, erro
 
 	token, err := jwt.NewWithClaims(jwt.SigningMethodES256, claims).SignedString(secret)
 	if err != nil {
+		log.Print(err)
 		return "", ErrFailedToGenerateJWT
 	}
 
@@ -72,7 +71,7 @@ func (h *jwtHandler) ExpiresAt() TTL {
 }
 
 func (h *jwtHandler) GenerateJWTPair(claims Claims) (refreshToken, accessToken string, err error) {
-	refreshToken, err = h.GenerateJWT(claims, RefreshToken)
+	refreshToken, err = h.GenerateJWT(Claims{}, RefreshToken)
 	if err != nil {
 		return "", "", fmt.Errorf("Failed to generate refresh token: %s", err)
 	}
@@ -87,7 +86,7 @@ func (h *jwtHandler) GenerateJWTPair(claims Claims) (refreshToken, accessToken s
 
 func (h *jwtHandler) ValidateJWT(token string, jwtType TokenType) (Claims, error) {
 	jwtToken, err := jwt.ParseWithClaims(token, &Claims{}, func(t *jwt.Token) (interface{}, error) {
-		var secret []byte
+		var secret *ecdsa.PrivateKey
 		if jwtType == AccessToken {
 			secret = h.access_secret
 		} else {
