@@ -153,3 +153,44 @@ func TestRefresh(t *testing.T) {
 
 	assert.Equal(nil, err)
 }
+
+func TestValidate(t *testing.T) {
+	assert := assert.New(t)
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	ctx := context.Background()
+
+	mockUserRepository := mock.NewMockUserRepository(ctrl)
+
+	jh, err := jwt.NewHandler(jwt.Config{
+		AccessSecret:  "privateKey",
+		RefreshSecret: "veryPrivateKey",
+		TTL: jwt.TTL{
+			AccessTTL:  time.Minute * 120,
+			RefreshTTL: time.Minute * 10000,
+		},
+	})
+	assert.Equal(nil, err)
+
+	logger := zap.NewLogger(zap.Config{})
+
+	s := New(logger, mockUserRepository, jh)
+
+	_, accessToken, err := jh.GenerateJWTPair(jwt.Claims{
+		ID:        1,
+		Username:  "Klaasje 51",
+		FirstName: "Klaasje",
+		LastName:  "Amadeus",
+		IsAdmin:   false,
+	})
+
+	req := &authv1.ValidateRequest{
+		AccessToken: accessToken,
+	}
+
+	_, err = s.Validate(ctx, req)
+
+	assert.Equal(nil, err)
+}

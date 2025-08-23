@@ -14,6 +14,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func (s *ServerAPI) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
@@ -110,4 +111,18 @@ func (s *ServerAPI) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.Re
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
+}
+
+func (s *ServerAPI) Validate(ctx context.Context, req *pb.ValidateRequest) (*emptypb.Empty, error) {
+	_, err := s.jwtHandler.ValidateJWT(req.AccessToken, jwt.AccessToken)
+	if errors.Is(err, jwt.ErrJWTTokenExpired) {
+		return nil, status.Error(codes.Unauthenticated, "JWT token expired")
+	} else if errors.Is(err, jwt.ErrSignatureInvalid) {
+		return nil, status.Error(codes.PermissionDenied, "Permission denied")
+	} else if err != nil {
+		log.Print(err.Error())
+		return nil, status.Error(codes.Internal, "Internal server error")
+	}
+
+	return &emptypb.Empty{}, nil
 }

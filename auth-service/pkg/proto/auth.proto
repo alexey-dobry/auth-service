@@ -4,10 +4,13 @@ package auth;
 
 option go_package = "nh.auth.v1;authv1";
 
+import "google/protobuf/empty.proto";
+
 service Auth {
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc Login (LoginRequest) returns (LoginResponse);
   rpc Refresh (RefreshRequest) returns (RefreshResponse);
+  rpc Validate (ValidateRequest) returns (google.protobuf.Empty);
 }
 
 message RegisterRequest {
@@ -40,4 +43,8 @@ message RefreshRequest {
 message RefreshResponse {
   string access_token = 1;
   string refresh_token = 2;
+}
+
+message ValidateRequest {
+  string access_token = 1;
 }
