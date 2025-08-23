@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/alexey-dobry/auth-service/internal/domain/jwt"
 	"github.com/alexey-dobry/auth-service/internal/domain/model"
@@ -30,7 +31,7 @@ func (s *ServerAPI) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.
 	}
 
 	err := s.repository.Add(user)
-	if errors.Is(err, gorm.ErrDuplicatedKey) {
+	if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 		return nil, status.Error(codes.AlreadyExists, "Account with specified email already exists")
 	} else if err != nil {
 		errMsg := fmt.Sprintf("Error adding new user to data: %s", err)
@@ -71,6 +72,7 @@ func (s *ServerAPI) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginR
 	}
 
 	if !utils.CheckPasswordHash(req.Password, user.HashPassword) {
+		s.logger.Info(user.ID)
 		return nil, status.Error(codes.PermissionDenied, "Wrong password")
 	}
 

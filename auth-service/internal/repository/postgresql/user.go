@@ -6,13 +6,13 @@ import (
 )
 
 func (ur *UserRepository) Add(userData model.User) error {
-	return ur.db.Create(userData).Error
+	return ur.db.Create(&userData).Error
 }
 
 func (ur *UserRepository) GetOne(email string) (model.User, error) {
 	user := model.User{}
 
-	result := ur.db.Select("username", "hash_password", "first_name", "last_name", "is_admin").Where("email = ?", email).Find(&user)
+	result := ur.db.Select("username", "hash_password", "first_name", "last_name", "is_admin").Where("email = ?", email).First(&user)
 	if result.Error != nil {
 		return model.User{}, result.Error
 	}

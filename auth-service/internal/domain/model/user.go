@@ -8,7 +8,7 @@ import (
 type User struct {
 	gorm.Model
 	Username     string `gorm:"not null" validate:"required,min=1,max=200"`
-	Email        string `gorm:"not null,uniqueIndex" validate:"required,email"`
+	Email        string `gorm:"uniqueIndex" validate:"required,email"`
 	HashPassword string `gorm:"not null" validate:"required,sha512"`
 	FirstName    string `gorm:"not null" validate:"required,min=1,max=200"`
 	LastName     string `gorm:"not null" validate:"required,min=1,max=200"`

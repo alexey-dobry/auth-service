@@ -17,5 +17,5 @@ jwt:
   access-secret: <very-secret-secret>
   refresh-secret: <so-very-secret-secret>
   ttl:
-    access-ttl: "0:07:00"
-    refresh-ttl: "7:00:00"
+    access-ttl: "2h"
+    refresh-ttl: "24h"
