@@ -11,9 +11,9 @@ import (
 )
 
 type Config struct {
-	Dir        string `validate:"required" yaml:"dir"`
-	Debug      bool   `validate:"required" yaml:"is_debug"`
-	Production bool   `validate:"required" yaml:"is_production"`
+	Dir        string `yaml:"dir"`
+	Debug      bool   `yaml:"is_debug"`
+	Production bool   `yaml:"is_production"`
 }
 
 type zapLogger struct {

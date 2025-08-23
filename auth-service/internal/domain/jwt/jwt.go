@@ -48,10 +48,10 @@ func (h *jwtHandler) GenerateJWT(claims Claims, jwtType TokenType) (string, erro
 	var TTL time.Duration
 	if jwtType == AccessToken {
 		secret = h.access_secret
-		TTL = h.ttl.AccessTTL
+		TTL, _ = time.ParseDuration(h.ttl.AccessTTL)
 	} else {
 		secret = h.refresh_secret
-		TTL = h.ttl.RefreshTTL
+		TTL, _ = time.ParseDuration(h.ttl.RefreshTTL)
 	}
 
 	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(TTL))

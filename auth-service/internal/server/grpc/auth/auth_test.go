@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/alexey-dobry/auth-service/internal/domain/jwt"
 	"github.com/alexey-dobry/auth-service/internal/domain/model"
@@ -24,18 +23,6 @@ func TestRegister(t *testing.T) {
 
 	ctx := context.Background()
 
-	// hashPassword, err := utils.HashPassword("GOOOOlang123")
-	// assert.Equal(nil, err)
-
-	// user := model.User{
-	// 	Username:     "Klaasje 51",
-	// 	Email:        "KlausShwab@gmail.com",
-	// 	HashPassword: hashPassword,
-	// 	FirstName:    "Klaasje",
-	// 	LastName:     "Amadeus",
-	// 	IsAdmin:      false,
-	// }
-
 	mockUserRepository := mock.NewMockUserRepository(ctrl)
 	mockUserRepository.EXPECT().Add(gomock.Any()).Return(nil)
 
@@ -43,8 +30,8 @@ func TestRegister(t *testing.T) {
 		AccessSecret:  "privateKey",
 		RefreshSecret: "veryPrivateKey",
 		TTL: jwt.TTL{
-			AccessTTL:  time.Minute * 120,
-			RefreshTTL: time.Minute * 10000,
+			AccessTTL:  "2h",
+			RefreshTTL: "24h",
 		},
 	})
 	assert.Equal(nil, err)
@@ -94,8 +81,8 @@ func TestLogin(t *testing.T) {
 		AccessSecret:  "privateKey",
 		RefreshSecret: "veryPrivateKey",
 		TTL: jwt.TTL{
-			AccessTTL:  time.Minute * 120,
-			RefreshTTL: time.Minute * 10000,
+			AccessTTL:  "2h",
+			RefreshTTL: "24h",
 		},
 	})
 	assert.Equal(nil, err)
@@ -127,8 +114,8 @@ func TestRefresh(t *testing.T) {
 		AccessSecret:  "privateKey",
 		RefreshSecret: "veryPrivateKey",
 		TTL: jwt.TTL{
-			AccessTTL:  time.Minute * 120,
-			RefreshTTL: time.Minute * 10000,
+			AccessTTL:  "2h",
+			RefreshTTL: "24h",
 		},
 	})
 	assert.Equal(nil, err)
@@ -168,8 +155,8 @@ func TestValidate(t *testing.T) {
 		AccessSecret:  "privateKey",
 		RefreshSecret: "veryPrivateKey",
 		TTL: jwt.TTL{
-			AccessTTL:  time.Minute * 120,
-			RefreshTTL: time.Minute * 10000,
+			AccessTTL:  "2h",
+			RefreshTTL: "24h",
 		},
 	})
 	assert.Equal(nil, err)

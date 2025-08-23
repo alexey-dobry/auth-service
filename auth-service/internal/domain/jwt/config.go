@@ -1,9 +1,5 @@
 package jwt
 
-import (
-	"time"
-)
-
 type Config struct {
 	AccessSecret  string `validate:"required" yaml:"access-secret"`
 	RefreshSecret string `validate:"required" yaml:"refresh-secret"`
@@ -11,6 +7,6 @@ type Config struct {
 }
 
 type TTL struct {
-	AccessTTL  time.Duration `validate:"required" yaml:"access-ttl"`
-	RefreshTTL time.Duration `validate:"required" yaml:"refresh-ttl"`
+	AccessTTL  string `validate:"required,duration" yaml:"access-ttl"`
+	RefreshTTL string `validate:"required,duration" yaml:"refresh-ttl"`
 }
