@@ -30,7 +30,12 @@ func (s *ServerAPI) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.
 		IsAdmin:      false,
 	}
 
-	err := s.repository.Add(user)
+	err := user.Validate()
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "Invalid user field value")
+	}
+
+	err = s.repository.Add(user)
 	if err != nil && strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 		return nil, status.Error(codes.AlreadyExists, "Account with specified email already exists")
 	} else if err != nil {
@@ -62,6 +67,13 @@ func (s *ServerAPI) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.
 }
 
 func (s *ServerAPI) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+	hashedPassword, _ := utils.HashPassword(req.Password)
+	userMock := &model.User{Email: req.Email, HashPassword: hashedPassword}
+	err := userMock.ValidateForLogin()
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "Invalid login arguments")
+	}
+
 	user, err := s.repository.GetOneByMail(req.Email)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.NotFound, "User entry with given credentials not found")
