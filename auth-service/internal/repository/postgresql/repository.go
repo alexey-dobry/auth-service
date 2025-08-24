@@ -2,6 +2,7 @@ package pg
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/alexey-dobry/auth-service/internal/domain/model"
 	"github.com/alexey-dobry/auth-service/internal/repository"
@@ -16,7 +17,19 @@ type UserRepository struct {
 func New(cfg Config) (repository.UserRepository, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable", cfg.Host, cfg.User, cfg.Password, cfg.DatabaseName, cfg.Port)
 
-	db, err := gorm.Open(postgres.Open(dsn))
+	maxRetries := 10
+	delay := 2 * time.Second
+
+	var db *gorm.DB
+	var err error
+	for range maxRetries {
+		db, err = gorm.Open(postgres.Open(dsn))
+		if err == nil {
+			break
+		}
+
+		time.Sleep(delay)
+	}
 	if err != nil {
 		return nil, err
 	}

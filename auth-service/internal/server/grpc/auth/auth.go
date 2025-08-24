@@ -76,7 +76,7 @@ func (s *ServerAPI) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginR
 		return nil, status.Error(codes.PermissionDenied, "Wrong password")
 	}
 
-	accessToken, refreshToken, err := s.jwtHandler.GenerateJWTPair(jwt.Claims{
+	refreshToken, accessToken, err := s.jwtHandler.GenerateJWTPair(jwt.Claims{
 		ID:        user.ID,
 		Username:  user.Username,
 		FirstName: user.FirstName,
@@ -116,7 +116,7 @@ func (s *ServerAPI) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.Re
 		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 
-	accessToken, refreshToken, err := s.jwtHandler.GenerateJWTPair(jwt.Claims{
+	refreshToken, accessToken, err := s.jwtHandler.GenerateJWTPair(jwt.Claims{
 		ID:        user.ID,
 		Username:  user.Username,
 		FirstName: user.FirstName,

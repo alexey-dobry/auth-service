@@ -1,14 +1,4 @@
 services:
-  auth-service:
-    build: ./auth-service
-    container_name: auth-service
-    volumes:
-      - ./logs/:/app/logs/
-    networks:
-      - app-network
-    depends_on:
-      - auth-database
-
   auth-database:
     image: postgres:latest
     container_name: auth-database
@@ -23,6 +13,18 @@ services:
       - POSTGRES_DB=postgres
     volumes:
       - database:/var/lib/postgresql/data
+
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "50051:50051"
+    volumes:
+      - ./logs/:/app/logs/
+    networks:
+      - app-network
+    depends_on:
+      - auth-database
 
 networks:
   app-network:
