@@ -12,7 +12,7 @@ type User struct {
 	HashPassword string `gorm:"not null" validate:"required"`
 	FirstName    string `gorm:"not null" validate:"required,min=1,max=200"`
 	LastName     string `gorm:"not null" validate:"required,min=1,max=200"`
-	IsAdmin      bool   `gorm:"not null" validate:"required"`
+	IsAdmin      bool   `gorm:"not null"`
 }
 
 func (u *User) Validate() error {
