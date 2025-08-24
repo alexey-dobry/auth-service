@@ -75,7 +75,7 @@ func TestLogin(t *testing.T) {
 	}
 
 	mockUserRepository := mock.NewMockUserRepository(ctrl)
-	mockUserRepository.EXPECT().GetOne("KlausShwab@gmail.com").Return(user, nil)
+	mockUserRepository.EXPECT().GetOneByMail("KlausShwab@gmail.com").Return(user, nil)
 
 	jh, err := jwt.NewHandler(jwt.Config{
 		AccessSecret:  "privateKey",
@@ -109,6 +109,12 @@ func TestRefresh(t *testing.T) {
 	ctx := context.Background()
 
 	mockUserRepository := mock.NewMockUserRepository(ctrl)
+	mockUserRepository.EXPECT().GetOneByID(gomock.Any()).Return(model.User{
+		Username:  "Klaasje 51",
+		FirstName: "Klaasje",
+		LastName:  "Amadeus",
+		IsAdmin:   false,
+	}, nil)
 
 	jh, err := jwt.NewHandler(jwt.Config{
 		AccessSecret:  "privateKey",

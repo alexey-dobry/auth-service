@@ -31,7 +31,7 @@ func (s *ServerAPI) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.
 	}
 
 	err := s.repository.Add(user)
-	if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+	if err != nil && strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 		return nil, status.Error(codes.AlreadyExists, "Account with specified email already exists")
 	} else if err != nil {
 		errMsg := fmt.Sprintf("Error adding new user to data: %s", err)
@@ -62,7 +62,7 @@ func (s *ServerAPI) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.
 }
 
 func (s *ServerAPI) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	user, err := s.repository.GetOne(req.Email)
+	user, err := s.repository.GetOneByMail(req.Email)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.NotFound, "User entry with given credentials not found")
 	} else if err != nil {
@@ -107,7 +107,22 @@ func (s *ServerAPI) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.Re
 		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 
-	accessToken, refreshToken, err := s.jwtHandler.GenerateJWTPair(claims)
+	user, err := s.repository.GetOneByID(claims.ID)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, status.Error(codes.NotFound, "User entry with given credentials not found")
+	} else if err != nil {
+		errMsg := fmt.Sprintf("Failed to get user data from database: %s", err)
+		s.logger.Errorf(errMsg)
+		return nil, status.Error(codes.Internal, "Internal server error")
+	}
+
+	accessToken, refreshToken, err := s.jwtHandler.GenerateJWTPair(jwt.Claims{
+		ID:        user.ID,
+		Username:  user.Username,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		IsAdmin:   user.IsAdmin,
+	})
 
 	return &pb.RefreshResponse{
 		AccessToken:  accessToken,

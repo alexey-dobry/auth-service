@@ -68,17 +68,32 @@ func (mr *MockUserRepositoryMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockUserRepository)(nil).Close))
 }
 
-// GetOne mocks base method.
-func (m *MockUserRepository) GetOne(email string) (model.User, error) {
+// GetOneByID mocks base method.
+func (m *MockUserRepository) GetOneByID(ID uint) (model.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOne", email)
+	ret := m.ctrl.Call(m, "GetOneByID", ID)
 	ret0, _ := ret[0].(model.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetOne indicates an expected call of GetOne.
-func (mr *MockUserRepositoryMockRecorder) GetOne(email any) *gomock.Call {
+// GetOneByID indicates an expected call of GetOneByID.
+func (mr *MockUserRepositoryMockRecorder) GetOneByID(ID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOne", reflect.TypeOf((*MockUserRepository)(nil).GetOne), email)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOneByID", reflect.TypeOf((*MockUserRepository)(nil).GetOneByID), ID)
+}
+
+// GetOneByMail mocks base method.
+func (m *MockUserRepository) GetOneByMail(email string) (model.User, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOneByMail", email)
+	ret0, _ := ret[0].(model.User)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetOneByMail indicates an expected call of GetOneByMail.
+func (mr *MockUserRepositoryMockRecorder) GetOneByMail(email any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOneByMail", reflect.TypeOf((*MockUserRepository)(nil).GetOneByMail), email)
 }

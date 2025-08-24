@@ -7,7 +7,9 @@ import (
 type UserRepository interface {
 	Add(model.User) error
 
-	GetOne(email string) (model.User, error)
+	GetOneByMail(email string) (model.User, error)
+
+	GetOneByID(ID uint) (model.User, error)
 
 	Close() error
 }

@@ -70,7 +70,7 @@ func (h *jwtHandler) ExpiresAt() TTL {
 }
 
 func (h *jwtHandler) GenerateJWTPair(claims Claims) (refreshToken, accessToken string, err error) {
-	refreshToken, err = h.GenerateJWT(claims, RefreshToken)
+	refreshToken, err = h.GenerateJWT(Claims{ID: claims.ID}, RefreshToken)
 	if err != nil {
 		return "", "", fmt.Errorf("Failed to generate refresh token: %s", err)
 	}
