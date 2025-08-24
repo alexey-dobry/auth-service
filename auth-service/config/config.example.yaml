@@ -1,7 +1,7 @@
 logger:
   dir: ./logs
   is_debug: false
-  is_development: false
+  is_development: true
 
 grpc:
   port: 50051

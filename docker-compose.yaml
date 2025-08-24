@@ -1,0 +1,32 @@
+services:
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    volumes:
+      - ./logs/:/app/logs/
+    networks:
+      - app-network
+    depends_on:
+      - auth-database
+
+  auth-database:
+    image: postgres:latest
+    container_name: auth-database
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=md5
+      - POSTGRES_USER=pq_user
+      - POSTGRES_PASSWORD=superpass
+      - POSTGRES_DB=postgres
+    volumes:
+      - database:/var/lib/postgresql/data
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  database:

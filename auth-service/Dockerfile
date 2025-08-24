@@ -1,29 +1,28 @@
 FROM golang:alpine AS builder
 
-LABEL stage=gobuilder
+WORKDIR /app
 
-ENV CGO_ENABLED=0
-
-RUN apk update --no-cache && apk add --no-cache tzdata
-
-WORKDIR /app/service/build
-
-COPY ./server/go.mod .
-COPY ./server/go.sum .
+COPY go.mod .
+COPY go.sum .
 RUN go mod download
 
-COPY ./server/ .
-RUN go build -ldflags="-s -w" -o /app/server ./cmd
+COPY . .
 
-FROM scratch
+RUN CGO_ENABLED=0 GOOS=linux go build -o auth-service ./cmd/service
 
-WORKDIR /app/migrations
+FROM alpine:latest
 
-COPY ./migrations .
+RUN apk --no-cache add ca-certificates
 
-WORKDIR /app/server
+WORKDIR /app
 
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=builder /app/server /app/server
+COPY --from=builder /app/auth-service .
+COPY --from=builder /app/config ./config
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-CMD ["./server"]
+RUN mkdir logs
+RUN touch ./logs/main.log
+
+EXPOSE 50051
+
+CMD ["./auth-service"]
