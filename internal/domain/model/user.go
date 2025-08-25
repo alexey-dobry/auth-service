@@ -19,15 +19,11 @@ func (u *User) Validate() error {
 	return validator.V.Struct(u)
 }
 
-func (u *User) ValidateForLogin() error {
-	var err error
-	err = validator.V.Var(u.Email, "required,email")
-	if err != nil {
-		return err
-	}
-	err = validator.V.Var(u.HashPassword, "required")
-	if err != nil {
-		return err
-	}
-	return err
+type UserCredentials struct {
+	Email    string `validate:"required,email"`
+	Password string `validate:"required"`
+}
+
+func (uc *UserCredentials) Validate() error {
+	return validator.V.Struct(uc)
 }

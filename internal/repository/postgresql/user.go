@@ -2,7 +2,6 @@ package pg
 
 import (
 	"github.com/alexey-dobry/auth-service/internal/domain/model"
-	"github.com/google/uuid"
 )
 
 func (ur *UserRepository) Add(userData model.User) error {
@@ -27,8 +26,4 @@ func (ur *UserRepository) GetOneByID(ID uint) (model.User, error) {
 		return model.User{}, result.Error
 	}
 	return user, nil
-}
-
-func (ur *UserRepository) Delete(userId uuid.UUID) error {
-	return ur.db.Where("id = ?", userId.String()).Delete(&model.User{}).Error
 }

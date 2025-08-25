@@ -8,7 +8,6 @@ import (
 	"github.com/alexey-dobry/auth-service/internal/domain/jwt"
 	pg "github.com/alexey-dobry/auth-service/internal/repository/postgresql"
 	"github.com/alexey-dobry/auth-service/internal/server/grpc"
-	"github.com/alexey-dobry/auth-service/pkg/logger"
 	"github.com/alexey-dobry/auth-service/pkg/logger/zap"
 	"github.com/alexey-dobry/auth-service/pkg/validator"
 	"github.com/ilyakaznacheev/cleanenv"
@@ -22,22 +21,23 @@ type Config struct {
 }
 
 func MustLoad() Config {
-	logger := zap.NewLogger(zap.Config{}).WithFields("layer", "config")
 	var cfg Config
-	configPath := ParseFlag(cfg, &logger)
+	configPath := ParseFlag(cfg)
 
 	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
-		logger.Fatalf("Failed to read config on path(%s): %s", configPath, err)
+		errMsg := fmt.Sprintf("Failed to read config on path(%s): %s", configPath, err)
+		panic(errMsg)
 	}
 
 	if err := validator.V.Struct(&cfg); err != nil {
-		logger.Fatalf("Failed to validate config: %s", err)
+		errMsg := fmt.Sprintf("Failed to validate config: %s", err)
+		panic(errMsg)
 	}
 
 	return cfg
 }
 
-func ParseFlag(cfg Config, logger *logger.Logger) string {
+func ParseFlag(cfg Config) string {
 	configPath := flag.String("config", "./config/config.yaml", "config file path")
 	configHelp := flag.Bool("help", false, "show configuration help")
 
@@ -45,9 +45,9 @@ func ParseFlag(cfg Config, logger *logger.Logger) string {
 		headerText := "Configuration options:"
 		help, err := cleanenv.GetDescription(&cfg, &headerText)
 		if err != nil {
-			(*logger).Fatalf("error getting configuration description: %s", err.Error())
+			errMsg := fmt.Sprintf("error getting configuration description: %s", err)
+			panic(errMsg)
 		}
-
 		fmt.Println(help)
 		os.Exit(0)
 	}

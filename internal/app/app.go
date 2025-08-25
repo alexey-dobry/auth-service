@@ -16,7 +16,7 @@ import (
 )
 
 type App interface {
-	Run(context.Context) error
+	Run(context.Context)
 }
 
 type app struct {
@@ -40,7 +40,7 @@ func New(cfg config.Config, logger logger.Logger, repository repository.UserRepo
 	return &a
 }
 
-func (a *app) Run(ctx context.Context) error {
+func (a *app) Run(ctx context.Context) {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -64,8 +64,7 @@ func (a *app) Run(ctx context.Context) error {
 			case <-ctx.Done():
 				return
 			default:
-				errMsg := fmt.Errorf("serving grpc server error: %s", err)
-				a.logger.Error(errMsg)
+				a.logger.Errorf("serving grpc server error: %s", err)
 				cancel()
 			}
 		}
@@ -91,6 +90,5 @@ func (a *app) Run(ctx context.Context) error {
 		a.logger.Warnf("store closing ended with error: %s", err)
 	}
 
-	a.logger.Info("app was gracefully shutdowned")
-	return nil
+	a.logger.Info("app was gracefully shutdown")
 }

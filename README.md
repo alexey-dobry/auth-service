@@ -17,6 +17,7 @@
     docker-compose build
     docker-compose up
     ```
+  
   for Linux users:
     ```bash
     docker compose build

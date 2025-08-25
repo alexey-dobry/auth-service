@@ -23,14 +23,12 @@ func main() {
 
 	repository, err := pg.New(cfg.Repository)
 	if err != nil {
-		logger.Error("Failed to create user repository: %s", err)
-		panic("Failed to create user repository")
+		logger.Fatalf("Failed to create user repository: %s", err)
 	}
 
 	jwtHandler, err := jwt.NewHandler(cfg.JWT)
 	if err != nil {
-		logger.Error("Failed to create jwt handler: %s", err)
-		panic("Failed to create jwt handler")
+		logger.Fatalf("Failed to create jwt handler: %s", err)
 	}
 
 	authServer := grpc.NewServer(logger, repository, jwtHandler)

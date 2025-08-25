@@ -3,8 +3,6 @@ package auth
 import (
 	"context"
 	"errors"
-	"fmt"
-	"log"
 	"strings"
 
 	"github.com/alexey-dobry/auth-service/internal/domain/jwt"
@@ -19,7 +17,11 @@ import (
 )
 
 func (s *ServerAPI) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
-	hashedPassword, _ := utils.HashPassword(req.Password)
+	hashedPassword, err := utils.HashPassword(req.Password)
+	if err != nil {
+		s.logger.Errorf("Failed to hash password: %s", err)
+		return nil, status.Error(codes.Internal, "Internal server error")
+	}
 
 	user := model.User{
 		Username:     req.Username,
@@ -30,8 +32,7 @@ func (s *ServerAPI) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.
 		IsAdmin:      false,
 	}
 
-	err := user.Validate()
-	if err != nil {
+	if err = user.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "Invalid user field value")
 	}
 
@@ -39,8 +40,7 @@ func (s *ServerAPI) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.
 	if err != nil && strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 		return nil, status.Error(codes.AlreadyExists, "Account with specified email already exists")
 	} else if err != nil {
-		errMsg := fmt.Sprintf("Error adding new user to data: %s", err)
-		s.logger.Errorf(errMsg)
+		s.logger.Errorf("Failed to add new user to data: %s", err)
 		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 
@@ -53,8 +53,7 @@ func (s *ServerAPI) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.
 	})
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to generate token pair: %s", err)
-		s.logger.Errorf(errMsg)
+		s.logger.Errorf("Failed to generate token pair: %s", err)
 		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 
@@ -67,10 +66,9 @@ func (s *ServerAPI) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.
 }
 
 func (s *ServerAPI) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	hashedPassword, _ := utils.HashPassword(req.Password)
-	userMock := &model.User{Email: req.Email, HashPassword: hashedPassword}
-	err := userMock.ValidateForLogin()
-	if err != nil {
+	userCredentials := &model.UserCredentials{Email: req.Email, Password: req.Password}
+
+	if err := userCredentials.Validate(); err != nil {
 		return nil, status.Error(codes.InvalidArgument, "Invalid login arguments")
 	}
 
@@ -78,13 +76,11 @@ func (s *ServerAPI) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginR
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.NotFound, "User entry with given credentials not found")
 	} else if err != nil {
-		errMsg := fmt.Sprintf("Failed to get user data from database: %s", err)
-		s.logger.Errorf(errMsg)
+		s.logger.Errorf("Failed to get user data from database: %s", err)
 		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 
 	if !utils.CheckPasswordHash(req.Password, user.HashPassword) {
-		s.logger.Info(user.ID)
 		return nil, status.Error(codes.PermissionDenied, "Wrong password")
 	}
 
@@ -97,8 +93,7 @@ func (s *ServerAPI) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginR
 	})
 
 	if err != nil {
-		errMsg := fmt.Sprintf("Failed to generate token pair: %s", err)
-		s.logger.Errorf(errMsg)
+		s.logger.Errorf("Failed to generate token pair: %s", err)
 		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 
@@ -115,7 +110,7 @@ func (s *ServerAPI) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.Re
 	} else if errors.Is(err, jwt.ErrSignatureInvalid) {
 		return nil, status.Error(codes.PermissionDenied, "Permission denied")
 	} else if err != nil {
-		log.Print(err.Error())
+		s.logger.Errorf("Failed validate refresh token: %s", err)
 		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 
@@ -123,8 +118,7 @@ func (s *ServerAPI) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.Re
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, status.Error(codes.NotFound, "User entry with given credentials not found")
 	} else if err != nil {
-		errMsg := fmt.Sprintf("Failed to get user data from database: %s", err)
-		s.logger.Errorf(errMsg)
+		s.logger.Errorf("Failed to get user data from database: %s", err)
 		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 
@@ -149,7 +143,7 @@ func (s *ServerAPI) Validate(ctx context.Context, req *pb.ValidateRequest) (*emp
 	} else if errors.Is(err, jwt.ErrSignatureInvalid) {
 		return nil, status.Error(codes.PermissionDenied, "Permission denied")
 	} else if err != nil {
-		log.Print(err.Error())
+		s.logger.Errorf("Failed validate access token: %s", err)
 		return nil, status.Error(codes.Internal, "Internal server error")
 	}
 

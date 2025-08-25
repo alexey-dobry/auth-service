@@ -10,15 +10,15 @@ import (
 	"gorm.io/gorm"
 )
 
+const maxRetries = 10
+const delay = 2 * time.Second
+
 type UserRepository struct {
 	db *gorm.DB
 }
 
 func New(cfg Config) (repository.UserRepository, error) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable", cfg.Host, cfg.User, cfg.Password, cfg.DatabaseName, cfg.Port)
-
-	maxRetries := 10
-	delay := 2 * time.Second
 
 	var db *gorm.DB
 	var err error

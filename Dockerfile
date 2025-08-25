@@ -20,9 +20,6 @@ COPY --from=builder /app/auth-service .
 COPY --from=builder /app/config ./config
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-RUN mkdir logs
-RUN touch ./logs/main.log
-
 EXPOSE 50051
 
 CMD ["./auth-service"]

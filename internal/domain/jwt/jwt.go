@@ -3,7 +3,6 @@ package jwt
 import (
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -58,7 +57,6 @@ func (h *jwtHandler) GenerateJWT(claims Claims, jwtType TokenType) (string, erro
 
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString(secret)
 	if err != nil {
-		log.Print(err)
 		return "", ErrFailedToGenerateJWT
 	}
 
