@@ -11,16 +11,20 @@
 2. Go to ./auth-service/config and setup config.yaml as specified in config.example.yaml <br/>
    Note: it is crucial to set repository:host value equal to "auth-database"<br/>
 
-3. Start the application
-  for Windows users:
+3. Start the application<br/>
+  - for Windows users:<br/>
     ```bash
     docker-compose build
+    ```
+    ```bash
     docker-compose up
     ```
   
-  for Linux users:
+  - for Linux users:<br/>
     ```bash
     docker compose build
+    ```
+    ```bash
     docker compose up
     ```
 
